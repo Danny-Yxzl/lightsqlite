@@ -4,7 +4,7 @@ setup(
     name='lightsqlite',
     version='0.1',
     description='The improved-package of sqlite3.',
-    py_modules=["lightmysql"],
+    py_modules=["lightsqlite"],
 
 
     long_description="The improved-package of sqlite3, made by Yixiangzhilv.",
@@ -18,7 +18,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9'
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10'
     ],
     keywords='sql sqlite sqlite3 database',
