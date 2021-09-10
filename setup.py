@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='lightsqlite',
-    version='0.1',
+    version='0.2',
     description='The improved-package of sqlite3.',
     py_modules=["lightsqlite"],
 
@@ -22,7 +22,6 @@ setup(
         'Programming Language :: Python :: 3.10'
     ],
     keywords='sql sqlite sqlite3 database',
-    # install_requires=[],
     project_urls={
         'Bug Reports': 'https://github.com/Danny-Yxzl/lightsqlite/issues',
         'Say Thanks!': 'https://www.yixiangzhilv.com/',

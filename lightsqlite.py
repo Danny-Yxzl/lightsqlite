@@ -1,5 +1,4 @@
 import sqlite3
-import time
 
 
 def try_type(s):
@@ -7,7 +6,7 @@ def try_type(s):
     if type(s) != str:
         return s
     else:
-        return "\"%s\"" % s.replace("\"", "\\\"")
+        return "'%s'" % s.replace("'", "\\'")
 
 
 def format_condition_into_sql(s: dict, sp="and", prefix="WHERE"):
@@ -39,38 +38,34 @@ def format_condition_into_sql(s: dict, sp="and", prefix="WHERE"):
 class Connect:
     database = "test.db"
 
-    def __init__(self,
-                 database="test.db"):
+    def __init__(self, database="test.db", check_same_thread=False):
         # 连接和游标的初始化
         self.database = database
-        self.connect = sqlite3.connect(self.database)
+        self.check_same_thread = check_same_thread
+        self.connect = sqlite3.connect(
+            self.database, check_same_thread=self.check_same_thread)
         print("连接到 %s 成功！" % self.database)
 
     def run_code(self, code, return_result=True):
-        # 提交MySQL语句，并将返回结果存入list中
-        try:
-            cursor = self.connect.cursor()
-            cursor.execute(code)
-            self.connect.commit()
-            if not return_result:
-                return None
-            results = []
+        cursor = self.connect.cursor()
+        cursor.execute(code)
+        self.connect.commit()
+        if not return_result:
+            return None
+        results = []
+        result = cursor.fetchone()
+        while result:
+            results.append(result)
             result = cursor.fetchone()
-            while result:
-                results.append(result)
-                result = cursor.fetchone()
-            return results
-        except sqlite3.ProgrammingError:
-            return ["You have an error in your SQL syntax.", "您的SQL语法有错误。"]
+        return results
 
     def insert(self, table: str, data: dict):
         # 分别将字典的key和value格式化为SQL语句
-        keys = "(" + ", ".join(t for t in data.keys(
-        )) + ")"
-        values = "(" + ", ".join(
-            ("\"%s\"" % (t.replace("\"", "\\\"") if type(t) == str else t))
-            for t in data.values()) + ")"
-        return self.run_code("INSERT INTO %s %s VALUES %s;" %
+        keys = ", ".join("`%s`" % t for t in data.keys())
+        values = ", ".join(
+            ("'%s'" % (t.replace("'", "\\'") if type(t) == str else t))
+            for t in data.values())
+        return self.run_code("INSERT INTO '%s' (%s) VALUES (%s);" %
                              (table, keys, values))
 
     def select(self,
@@ -80,12 +75,12 @@ class Connect:
                condition_sp="and",
                limit=""):
         # 若只传入table，则语句等价于SELECT * FROM table;
-        if type(target).__name__ == "str":
+        if type(target) == str:
             target = [target]
         condition = format_condition_into_sql(condition, condition_sp)
         if limit:
             limit = "limit " + limit
-        return self.run_code("SELECT %s FROM %s %s %s;" %
+        return self.run_code("SELECT %s FROM '%s' %s %s;" %
                              ((target and "`" + "`,`".join(target) + "`")
                               or "*", table, condition, limit))
 
